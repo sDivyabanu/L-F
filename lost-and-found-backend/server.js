@@ -39,7 +39,14 @@ const storage = multer.diskStorage({
     },
 });
 
-const uploads = multer({ storage });
+// Only images are accepted, so uploaded files can't be served back as HTML or scripts
+const uploads = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => /^image\/(jpeg|png|gif|webp)$/.test(file.mimetype) && /\.(jpe?g|png|gif|webp)$/i.test(file.originalname)
+        ? cb(null, true)
+        : cb(new Error('Only image uploads are allowed')),
+});
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
